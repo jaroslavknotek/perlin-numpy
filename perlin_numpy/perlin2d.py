@@ -6,7 +6,11 @@ def interpolant(t):
 
 
 def generate_perlin_noise_2d(
-        shape, res, tileable=(False, False), interpolant=interpolant
+    shape, 
+    res, 
+    tileable=(False, False), 
+    interpolant=interpolant,
+    rnd = None
 ):
     """Generate a 2D numpy array of perlin noise.
 
@@ -27,12 +31,16 @@ def generate_perlin_noise_2d(
     Raises:
         ValueError: If shape is not a multiple of res.
     """
+    
+    if rnd is None:
+        rnd = np.random.RandomState()
+    
     delta = (res[0] / shape[0], res[1] / shape[1])
     d = (shape[0] // res[0], shape[1] // res[1])
     grid = np.mgrid[0:res[0]:delta[0], 0:res[1]:delta[1]]\
              .transpose(1, 2, 0) % 1
     # Gradients
-    angles = 2*np.pi*np.random.rand(res[0]+1, res[1]+1)
+    angles = 2*np.pi*rnd.rand(res[0]+1, res[1]+1)
     gradients = np.dstack((np.cos(angles), np.sin(angles)))
     if tileable[0]:
         gradients[-1,:] = gradients[0,:]
@@ -58,7 +66,7 @@ def generate_perlin_noise_2d(
 def generate_fractal_noise_2d(
         shape, res, octaves=1, persistence=0.5,
         lacunarity=2, tileable=(False, False),
-        interpolant=interpolant
+        interpolant=interpolant,rnd = None    
 ):
     """Generate a 2D numpy array of fractal noise.
 
@@ -89,7 +97,7 @@ def generate_fractal_noise_2d(
     amplitude = 1
     for _ in range(octaves):
         noise += amplitude * generate_perlin_noise_2d(
-            shape, (frequency*res[0], frequency*res[1]), tileable, interpolant
+            shape, (frequency*res[0], frequency*res[1]), tileable, interpolant,rnd=rnd
         )
         frequency *= lacunarity
         amplitude *= persistence
